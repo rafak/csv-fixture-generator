@@ -6,7 +6,6 @@ module.exports = {
     item: require('./csv.item'),
     category: require('./csv.category'),
     transaction: require('./csv.transaction'),
-    // sales: require('./csv.transaction.item'),
     timeattendance: require('./csv.timeattendance'),
   }
 }

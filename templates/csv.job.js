@@ -2,8 +2,7 @@
 
 const job = {
   'Job ID': {
-    // faker: 'random.uuid'
-    incrementalId: 1
+    randexp: /[a-zA-Z0-9]{5,7}/
   },
   'Job Name': {
     faker: 'name.jobTitle'

@@ -8,7 +8,7 @@ const time = {
     get: 'Location ID'
   },
   'Shift ID': {
-    incrementalId: 1
+    randexp: /[a-zA-Z0-9]{5,7}/
   },
   'Employee': {
     function: function () {

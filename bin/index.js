@@ -7,7 +7,9 @@ const fs = require('fs-extra')
 const path = require('path')
 const mocker = require('mocker-data-generator').default
 const templates = require('../templates')
-const { Parser } = require('json2csv');
+const {
+  Parser
+} = require('json2csv');
 const program = require('commander');
 program.version(require('../package.json').version)
 
@@ -18,7 +20,7 @@ const defaultPattern = 'L2.J4.E6.C10.I20.S20.T5.A2'
 
 const parsePattern = (value, previous) => {
   const proper = /([ACEIJLST]\d+)+/
-  const filtered = _.toUpper(value).replace(/[^A-Z0-9]/g,'')
+  const filtered = _.toUpper(value).replace(/[^A-Z0-9]/g, '')
   if (!proper.test(filtered)) {
     throw new Error('Bad pattern format')
   }
@@ -42,14 +44,21 @@ const unwind = collection => _.flatMap(collection, row => {
 
 })
 
+const commaSeparatedList = value => value.split(',')
+
+const m = mocker()
+
+m.DB._userOptions = {
+  locations: program.locations || []
+}
+
 const run = (P) => {
-  return mocker()
-    .schema('locations', templates.csv.location, P.L)
+  return m
+    .schema('locations', templates.csv.location, (program.locations || []).length || P.L)
     .schema('jobs', templates.csv.job, P.J)
     .schema('employees', templates.csv.employee, P.E)
     .schema('categories', templates.csv.category, P.C)
     .schema('items', templates.csv.item, P.I)
-    // .schema('sales', templates.csv.sales, P.S)
     .schema('transactions', templates.csv.transaction, P.T)
     .schema('attendance', templates.csv.timeattendance, P.A)
     .build()
@@ -73,19 +82,20 @@ const run = (P) => {
 }
 
 program
-  .description('Generate csv fixtures based on pattern.'        +
+  .description('Generate csv fixtures based on pattern.' +
     '\n If no pattern is provided a default one will be used. ' +
-    '\n Pattern syntax: E3:T5.I2A-10'+
-    '\n\n This will generate 3 employees, 2 items, 5 transactions and 10 shifts.'+
+    '\n Pattern syntax: E3:T5.I2A-10' +
+    '\n\n This will generate 3 employees, 2 items, 5 transactions and 10 shifts.' +
     '\n\n any non alfanum character can be used as the separator for (or none).' +
-    '\n\n Codes: L-locations, J-jobs, E-employees, C-categories, I-items, S-sales, '+
-    '\n T-transactions, A-attendence (shifts).'+
+    '\n\n Codes: L-locations, J-jobs, E-employees, C-categories, I-items, S-sales, ' +
+    '\n T-transactions, A-attendence (shifts).' +
     '\n\n Default pattern: ' + defaultPattern)
   .option('-p, --pattern [string]', 'generation pattern', parsePattern, defaultPattern)
   .option('-o, --output [string]', 'output file path', '.')
   .option('-x, --prefix [string]', 'prefix for filenames', crypto.randomBytes(6).toString('hex'))
+  .option('--locations [ids]','list of location ids to use', commaSeparatedList)
   .parse(process.argv)
 
-  run(_.defaults(program.pattern, parsePattern(defaultPattern)))
-    .then(() => console.log('DONE'))
-    .catch(console.error)
+run(_.defaults(program.pattern, parsePattern(defaultPattern)))
+  .then(() => console.log('DONE'))
+  .catch(console.error)

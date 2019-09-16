@@ -6,8 +6,7 @@ const employee = {
     get: 'Location ID'
   },
   'Employee ID': {
-    // faker: 'random.uuid'
-    incrementalId: 1
+    randexp: /[a-zA-Z0-9]{5,7}/
   },
   'First Name': {
     faker: 'name.firstName'

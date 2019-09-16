@@ -61,7 +61,7 @@ const transaction = {
           [ x => _.includes(ITEM_TYPES, x), () => (this.faker.random.number({ min: 1, max: 50 })/10).toFixed(2) ],
           [ x => _.includes(TAX_TYPES, x),  () => (salesSum * 0.15).toFixed(2) ],
           [ x => _.includes(x, 'TIP'),      () => (salesSum * Math.random() * 10/100).toFixed(2) ],
-          [ _.stubTrue(),                   _.constant(salesSum.toFixed(2)) ]
+          [ _.stubTrue,                   _.constant(salesSum.toFixed(2)) ]
         ])(t)
 
         salesSum += _.cond([
@@ -83,11 +83,6 @@ const transaction = {
       })
     }
   },
-  // 'Items': {
-  //   hasMany: 'sales',
-  //   min: 2,
-  //   max: 10,
-  // }
 }
 
 module.exports = transaction
