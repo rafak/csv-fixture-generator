@@ -15,7 +15,7 @@ const item = {
     faker: 'commerce.productName'
   },
   'Item Price': {
-    eval: '(faker.random.number({max:999})/100).toFixed(2)'
+    eval: '(faker.random.number({min:30,max:999})/100).toFixed(2)'
   }
 }
 
