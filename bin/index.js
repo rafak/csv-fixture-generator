@@ -48,10 +48,6 @@ const commaSeparatedList = value => value.split(',')
 
 const m = mocker()
 
-m.DB._userOptions = {
-  locations: program.locations || []
-}
-
 const run = (P) => {
   return m
     .schema('locations', templates.csv.location, (program.locations || []).length || P.L)
@@ -95,6 +91,10 @@ program
   .option('-x, --prefix [string]', 'prefix for filenames', crypto.randomBytes(6).toString('hex'))
   .option('--locations [ids]','list of location ids to use', commaSeparatedList)
   .parse(process.argv)
+
+m.DB._userOptions = {
+  locations: program.locations || []
+}
 
 run(_.defaults(program.pattern, parsePattern(defaultPattern)))
   .then(() => console.log('DONE'))
