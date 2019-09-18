@@ -17,7 +17,7 @@ const transaction = {
   'Trans/Check ID': {
     faker: 'random.number'
   },
-  'Employee': {
+  'Employee ID': {
     function: function () {
       const empSource = this.db.employees.filter(x => this.object.Location === x.Location)
       return this.faker.random.arrayElement(empSource)['Employee ID']
