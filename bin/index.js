@@ -7,10 +7,8 @@ const fs = require('fs-extra')
 const path = require('path')
 const mocker = require('mocker-data-generator').default
 const templates = require('../templates')
-const {
-  Parser
-} = require('json2csv');
-const program = require('commander');
+const { Parser } = require('json2csv')
+const program = require('commander')
 program.version(require('../package.json').version)
 
 // L-locations, J-jobs, E-employees, C-categories, I-items, S-sales

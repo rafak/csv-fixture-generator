@@ -15,7 +15,7 @@ const employee = {
     faker: 'name.lastName'
   },
   'Employee Number': {
-    faker: 'random.number'
+    randexp: /[0-9]{5,7}/
   },
   'Jobs': {
     hasMany: 'jobs',
