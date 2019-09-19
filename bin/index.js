@@ -87,7 +87,7 @@ program
   .option('-p, --pattern [string]', 'generation pattern', parsePattern, defaultPattern)
   .option('-o, --output [string]', 'output file path', '.')
   .option('-x, --prefix [string]', 'prefix for filenames', crypto.randomBytes(6).toString('hex'))
-  .option('--locations [ids]','list of location ids to use', commaSeparatedList)
+  .option('--locations [ids]','list of location ids to use - each as ID, @Weekstart or ID@WeekStart', commaSeparatedList)
   .parse(process.argv)
 
 m.DB._userOptions = {

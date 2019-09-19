@@ -1,6 +1,7 @@
 'use strict'
 
 const _ = require('lodash')
+const moment = require('moment-timezone')
 // remove MISC from items so it's not confused with payments
 const ITEM_TYPES = ['ITEM', 'DISCOUNT', 'AUTOGRAT', 'SERVICE', 'VOID',] //'MISC']
 const PAYMENT_TYPES = ['CASH', 'VISA', 'MC', 'AMEX', 'DISCOVER', 'MISC']
@@ -12,7 +13,9 @@ const transaction = {
     get: 'Location ID'
   },
   'Date': {
-    faker: 'date.recent'
+    function: function() {
+      return moment(this.faker.date.recent()).format('YYYY-MM-DD HH:mm:ss')
+    }
   },
   'Trans/Check ID': {
     faker: 'random.number'

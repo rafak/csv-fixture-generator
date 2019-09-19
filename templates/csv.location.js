@@ -3,24 +3,31 @@
 const _ = require('lodash')
 
 const location = {
-  'Location ID': {
+  'Override': {
     function: function() {
-      const result = _.cond([
-        [_.flow(_.property('db._userOptions.locations.length')), x => this.faker.random.arrayElement(x.db._userOptions.locations)],
-        [_.stubTrue, x => (x.db['locations'].length || 0) + 1],
-      ])(this)
-
-      return result
-      // if (_.get(this,'_userOptions.locations') && this._userOptions.locations.length > 0) {
-      //   return this.faker.random.arrayElement(this._userOptions['locations'])
-      // }
-      // return (this.db['locations'].length || 0) + 1
-    }
-    // faker: 'random.uuid'
-    // incrementalId: 1
+      const locNum = this.db.locations.length + 1
+      const passedParam = _.get(this, `db._userOptions.locations.${locNum-1}`,'@6:00')
+      const params = passedParam.replace(/^([^@]*)@?([0-9:]*)$/,'$1@$2')
+      const override = params.split('@')
+      return {
+        id:  _.first(override) || locNum,
+        week_start: (_.last(override) || '06:00')
+          .split(':')
+          .map(x => ('0' + x).slice(-2))
+          .concat(['00'])
+          .join(':')
+      }
+    },
+    virtual:true
+  },
+  'Location ID': {
+    self:'Override.id'
   },
   'Location Name': {
     faker: 'address.city'
+  },
+  'Week Start Time': {
+    self:'Override.week_start'
   }
 }
 

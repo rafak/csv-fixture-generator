@@ -3,9 +3,13 @@
 const moment = require('moment-timezone')
 
 const time = {
-  'Location': {
+  _location : {
     hasOne: 'locations',
-    get: 'Location ID'
+    virtual: true
+  },
+  'Location': {
+    self:'_location["Location ID"]',
+    eval: true
   },
   'Shift ID': {
     randexp: /[a-zA-Z0-9]{5,7}/
@@ -30,19 +34,6 @@ const time = {
     self:'Employee["Last Name"]',
     eval: true
   },
-  // we cant pass a 'virtual' eval element
-  // we need to get if using faker for a concrete object
-  // either this way or perhaps "cleaner" using `function` mocker below
-  // 'EmployeeJobs':{
-  //   self:'Employee["Jobs"]',
-  //   virtual: true,
-  //   eval:true
-  // },
-  // 'Job':{
-  //   faker: 'random.arrayElement(object.EmployeeJobs)',
-  //   virtual: true,
-  //   eval: true
-  // },
   'Job':{
     function : function() {
       const jobs = this.object.Employee.Jobs
@@ -60,6 +51,7 @@ const time = {
   },
   'Shift' : {
     function: function() {
+      const weekStart = this.object._location["Week Start Time"]
       // generate at least 15 min of shift, max 8h
       const totalSecs = this.faker.random.number({min:900, max:28799})
       // generate 0 (50%) or max 2h overtime
@@ -67,8 +59,9 @@ const time = {
       const clockIn = moment(this.faker.date.recent())
       const businessDate = clockIn.clone().format('YYYY-MM-DD')
       const clockOut = clockIn.clone().add(totalSecs + OTMins * 60,'seconds')
+      const weekStartBusinessDate = moment(`${businessDate}T${weekStart}`).isAfter(clockIn) ? moment(businessDate).subtract(1,'day').format('YYYY-MM-DD') : businessDate
       return {
-        'Business Date': businessDate,
+        'Business Date': weekStartBusinessDate,
         'Clock In': clockIn.clone().format('YYYY-MM-DD HH:mm:ss'),
         'Clock Out': clockOut.clone().format('YYYY-MM-DD HH:mm:ss'),
         'Total Minutes': clockOut.diff(clockIn,'minutes'),
