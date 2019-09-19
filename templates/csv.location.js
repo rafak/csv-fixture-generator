@@ -14,7 +14,8 @@ const location = {
         week_start: (_.last(override) || '06:00')
           .split(':')
           .map(x => ('0' + x).slice(-2))
-          .concat(['00'])
+          .concat(['00','00','00'])
+          .slice(0,3)
           .join(':')
       }
     },
