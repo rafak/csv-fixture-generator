@@ -9,7 +9,7 @@ const job = {
   },
   'Rate': {
     function: function () {
-      return 5 + Math.round(Math.random() * 59) + '.' + Math.round(Math.random() * 99)
+      return parseFloat(5 + Math.round(Math.random() * 59) + '.' + Math.round(Math.random() * 99))
     }
   }
 }
