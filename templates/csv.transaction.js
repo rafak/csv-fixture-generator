@@ -2,6 +2,8 @@
 
 const _ = require('lodash')
 const moment = require('moment-timezone')
+const randomWords = require('random-words')
+
 // remove MISC from items so it's not confused with payments
 const ITEM_TYPES = ['ITEM', 'DISCOUNT', 'AUTOGRAT', 'SERVICE', 'VOID',] //'MISC']
 const PAYMENT_TYPES = ['CASH', 'VISA', 'MC', 'AMEX', 'DISCOVER', 'MISC']
@@ -58,8 +60,8 @@ const transaction = {
         const salesItem = _.sample(itemSource)
         // random quantity for ITEMS, otherwise 1
         const qty = t === 'ITEM' ? this.faker.random.number({ min: 1, max: 5 }) : 1
-        const id = t === 'ITEM' ? salesItem['Item ID'] : _.includes(ITEM_TYPES, t) ? this.faker.lorem.words() : null
-        const desc = t === 'ITEM' ? salesItem['Item Name'] : id ? id: null
+        const id = t === 'ITEM' ? salesItem['Item ID'] : _.includes(ITEM_TYPES, t) ? randomWords({ min: 2, max: 4 , join:'-'}) : null
+        const desc = t === 'ITEM' ? salesItem['Item Name'] : id ? id.split('-').map(x=>x.charAt(0).toUpperCase() + x.slice(1)).join(' '): null
         const amount = _.cond([
           [ x => x === 'ITEM',              () => (qty * salesItem['Item Price']).toFixed(2) ],
           [ x => x === 'DISCOUNT',          () => (salesSum * Math.random() * 30/100).toFixed(2) ],

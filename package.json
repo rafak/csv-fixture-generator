@@ -19,7 +19,8 @@
     "lodash": "^4.17.15",
     "mocker-data-generator": "^2.6.6",
     "moment-timezone": "^0.5.25",
-    "randexp": "^0.5.3"
+    "randexp": "^0.5.3",
+    "random-words": "^1.1.0"
   },
   "engines": {
     "node": ">=8.10.0"
