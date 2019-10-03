@@ -20,7 +20,7 @@ const transaction = {
     }
   },
   'Trans/Check ID': {
-    faker: 'random.number'
+    incrementalId:10000
   },
   'Employee ID': {
     function: function () {
@@ -75,7 +75,7 @@ const transaction = {
         salesSum += _.cond([
           [ x =>['VOID', 'DISCOUNT'].includes(x),         _.constant(-amount) ],
           // [ x => _.includes(x, 'TIP'),              _.constant(+amount) ],
-          [ x => _.concat(ITEM_TYPES, 'TAX').includes(x), _.constant(+amount) ],
+          [ x => _.concat(ITEM_TYPES, TAX_TYPES).includes(x), _.constant(+amount) ],
           [ _.stubTrue,                                   _.constant(0) ]
         ])(t)
 
