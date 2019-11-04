@@ -1,19 +1,21 @@
 'use strict'
 
 const _ = require('lodash')
+const moment = require('moment-timezone')
 const crypto = require('crypto')
 const Bluebird = require('bluebird')
 const fs = require('fs-extra')
 const path = require('path')
 const mocker = require('mocker-data-generator').default
 const templates = require('../templates')
+const reports = require('../reports')
 const { Parser } = require('json2csv')
 const program = require('commander')
 program.version(require('../package.json').version)
 
 // L-locations, J-jobs, E-employees, C-categories, I-items, S-sales
 // T-transactions, A-attendence (shifts)
-const defaultPattern = 'L2.J4.E6.C10.I20.S20.T5.A2'
+const defaultPattern = 'L2.J4.E6.C10.I200.S100.T50.A2'
 
 
 const parsePattern = (value, previous) => {
@@ -58,20 +60,42 @@ const run = (P) => {
     .build()
     .then(json => {
       const toPublish = _.mapValues(json, unwind)
+
+      const tR = reports.transactions(toPublish.transactions)
+      const aR = reports.attendance(toPublish.attendance)
+
       return {
-        employees: (new Parser()).parse(toPublish.employees),
-        items: (new Parser()).parse(toPublish.items),
-        transactions: (new Parser()).parse(toPublish.transactions),
-        attendance: (new Parser()).parse(toPublish.attendance)
+        data: {
+          employees: (new Parser()).parse(toPublish.employees),
+          items: (new Parser()).parse(toPublish.items),
+          transactions: (new Parser()).parse(toPublish.transactions),
+          attendance: (new Parser()).parse(toPublish.attendance)
+        },
+        report: ['TRANSACTIONS',tR, 'ATTENDENCE', aR].join('\n\n')
       }
     })
-    .then(data => {
+    .then(({ data, report }) => {
       return Bluebird.map(_.keys(data), key => {
         const file = path.join(program.output, `${program.prefix}-out-${key}.csv`)
         return fs.writeFile(file, data[key])
           .then(() => console.log('Finished writing file: ', file))
+          .then(() => file)
           .catch(console.error)
       })
+        .then(files => {
+          return [
+            'CSV Data Set information',
+            `Date created: ${moment().format('YYY-MM-DD HH:mm:ss')}`,
+            `CSV Files created: ${files.join(', ')}`,
+            'Parameters:',
+            ` - pattern: ${JSON.stringify(program.pattern)}`,
+            ` - prefix: ${program.prefix}`,
+            ` - locations: ${program.locations}`,
+            ` - output: ${program.ouput}`,
+            '',
+            report
+          ].join('\n')
+        })
     })
 }
 
@@ -87,7 +111,8 @@ program
   .option('-p, --pattern [string]', 'generation pattern', parsePattern, defaultPattern)
   .option('-o, --output [string]', 'output file path', '.')
   .option('-x, --prefix [string]', 'prefix for filenames', crypto.randomBytes(6).toString('hex'))
-  .option('--locations [ids]','list of location ids to use - each as ID, @Weekstart or ID@WeekStart', commaSeparatedList)
+  .option('-r, --report', 'generate data report file')
+  .option('--locations [ids]', 'list of location ids to use - each as ID, @Weekstart or ID@WeekStart', commaSeparatedList)
   .parse(process.argv)
 
 m.DB._userOptions = {
@@ -95,5 +120,11 @@ m.DB._userOptions = {
 }
 
 run(_.defaults(program.pattern, parsePattern(defaultPattern)))
+  .then((report) => {
+    if (program.report) {
+      const reportFile = `${program.prefix}-out-data-report.csv`
+      return fs.writeFile(reportFile, report)
+    }
+  })
   .then(() => console.log('DONE'))
   .catch(console.error)
