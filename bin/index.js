@@ -15,7 +15,7 @@ program.version(require('../package.json').version)
 
 // L-locations, J-jobs, E-employees, C-categories, I-items, S-sales
 // T-transactions, A-attendence (shifts)
-const defaultPattern = 'L2.J4.E6.C10.I200.S100.T50.A2'
+const defaultPattern = 'L2.J4.E48.C5.I10.S3.T5.A5'
 
 
 const parsePattern = (value, previous) => {
@@ -71,7 +71,7 @@ const run = (P) => {
           transactions: (new Parser()).parse(toPublish.transactions),
           attendance: (new Parser()).parse(toPublish.attendance)
         },
-        report: ['TRANSACTIONS',tR, 'ATTENDENCE', aR].join('\n\n')
+        report: ['TRANSACTIONS',tR, '\nATTENDANCE', aR].join('\n\n')
       }
     })
     .then(({ data, report }) => {
@@ -86,7 +86,8 @@ const run = (P) => {
           return [
             'CSV Data Set information',
             `Date created: ${moment().format('YYY-MM-DD HH:mm:ss')}`,
-            `CSV Files created: ${files.join(', ')}`,
+            'CSV Files created:',
+            `${files.map(f=>' - ' + f).join('\n')}`,
             'Parameters:',
             ` - pattern: ${JSON.stringify(program.pattern)}`,
             ` - prefix: ${program.prefix}`,

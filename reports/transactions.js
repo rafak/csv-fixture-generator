@@ -60,7 +60,8 @@ module.exports = (data) => {
     reportFor(_.filter(data, { 'Element Type': 'TAX' }), 'etax').join('\n'),
   ]
 
-  return [
+
+  const output = [
     reportMeta,
     reportFor(_.filter(data, { 'Element Type': 'DISCOUNT' }), 'discounts'),
     reportFor(_.filter(data, { 'Element Type': 'VOID' }), 'voids'),
@@ -70,7 +71,13 @@ module.exports = (data) => {
     tips,
     taxes
   ]
+
+  return _
+    .chain(output)
+    .map(_.compact)
+    .filter(_.size)
     .map(part => _.sortBy(part))
     .map(part => part.join('\n'))
     .join('\n\n')
+    .value()
 }

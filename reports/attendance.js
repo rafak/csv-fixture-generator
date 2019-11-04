@@ -12,7 +12,11 @@ const reportWith = (data, extractorFun) => {
     .groupBy(x => ['Date: ' + moment(x['Business Date']).format('Y-MM-DD'), 'Loc ID ' + x['Location'] + ': '].join(', '))
     .mapValues(extractorFun)
     .mapValues((v, k) => {
-      const aString = _.overSome(_.isArray, _.isPlainObject)(v) ? _.isArray(v) ? _.map(v, r => [k, r].join('')).join('\n') : _.map(v, (ov, ok) => [ok, ov].join(' ')).join('\n') : [k, v].join(' ')
+      const aString = _.overSome(_.isArray, _.isPlainObject)(v)
+        ? _.isArray(v)
+          ? _.map(v, r => [k, r].join('')).join('\n')
+          : _.map(v, (ov, ok) => [ok, ov].join(' ')).join('\n')
+        : [k, v].join(' ')
       return aString
     })
     .values()
@@ -84,19 +88,37 @@ module.exports = (data) => {
   })
 
   const samples = reportWith(data, (shifts) => {
-    const otEmps = _.chain(shifts).filter(s => s['Total OT Minutes'] !== '0.00').value()
+    const otEmps = _.chain(shifts).filter(s => s['Total OT Minutes'] !== '0').value()
     const empIds = _.chain(otEmps).map('Employee ID').uniq().value()
+    if (_.size(empIds) === 0) {
+      return null
+    }
     return 'employees with ot hours: ' + _.take(empIds, 5).join(', ')
   })
 
-  return [
-    reportMeta,
-    shifts,
-    overtime,
-    jobs,
-    employees,
-    samples
-  ]
-    .map(part => part.join('\n'))
+  return _
+    .chain([
+      reportMeta,
+      shifts,
+      overtime,
+      jobs,
+      employees,
+      ['Sample set of employees with OT'],
+      samples
+    ])
+    .map(_.compact)
+    .filter(_.size)
+    .map(parts => {
+      let lastDate = null
+      const newParts = _.reduce(parts, (out, part) => {
+        const partDate = _.nth(part.match(/^Date: (\d{4}-\d{2}-\d{2})/),1)
+        const mid = lastDate && partDate !== lastDate ? [' '] : null
+        lastDate = partDate
+        return _.concat(out, mid || null, part)
+      }, [])
+      return _.compact(newParts).map(_.trim)
+    })
+    .map(parts => parts.join('\n'))
     .join('\n\n')
+    .value()
 }
